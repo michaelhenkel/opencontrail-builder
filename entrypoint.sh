@@ -24,7 +24,6 @@ export GIT_ACCOUNT=${GIT_ACCOUNT}
 export USER=root
 git config --global user.email $GIT_ACCOUNT
 
-ssh-keygen -f /root/.ssh/id_rsa -t rsa -N ''
 ssh-agent|grep -v "Agent pid" > ~/.ssh/ssh-agent.sh
 chmod +x ~/.ssh/ssh-agent.sh
 . ~/.ssh/ssh-agent.sh
@@ -44,9 +43,17 @@ repo sync
 
 cd third_party
 cat <<EOF > fetch_packages.patch
---- fetch_packages.py      2016-09-26 07:21:47.632946648 +0000
-+++ fetch_packages.py.new          2016-09-26 07:24:05.812953040 +0000
-@@ -232,7 +232,10 @@
+--- fetch_packages.py      2016-09-26 11:10:04.429580238 +0000
++++ fetch_packages.py.mod          2016-09-26 11:06:36.701570628 +0000
+@@ -228,11 +228,17 @@
+
+
+     if pkg.format == 'tgz':
+-        cmd = ['tar', 'zxvf', ccfile]
++        if unpackdir:
++            cmd = ['tar', 'zxvf', '../' + ccfile]
++        else:
++            cmd = ['tar', 'zxvf', ccfile]
      elif pkg.format == 'tbz':
          cmd = ['tar', 'jxvf', ccfile]
      elif pkg.format == 'zip':
@@ -59,7 +66,7 @@ cat <<EOF > fetch_packages.patch
          cmd = ['npm', 'install', ccfile, '--prefix', ARGS['cache_dir']]
      elif pkg.format == 'file':
 EOF
-patch < fetch_packages.patch
+#patch < fetch_packages.patch
 python fetch_packages.py
 cd ..
 chmod +w packages.make
@@ -82,4 +89,15 @@ grep '^source-package-.*:' packages.make |grep -v ceilometer| cut -d : -f 1 | wh
 done
 cd build/packages
 for i in *.dsc; do pkgname=$(echo $i|cut -d "_" -f 1); mv ${pkgname}_*.gz ${pkgname}_*.dsc ${pkgname}/; done
-for i in `echo */`; do cd $i;  SCONSFLAGS="-j ${JOBS} -Q debug=1" dpkg-buildpackage -b -rfakeroot -k${KEY}; cd ..; done
+for i in `echo */`; do 
+  cd $i
+  SCONSFLAGS="-j ${JOBS} -Q debug=1" dpkg-buildpackage -b -rfakeroot -k${KEY}
+  if [ $? -ne 0 ]; then
+    SCONSFLAGS="-j ${JOBS} -Q debug=1" dpkg-buildpackage -b -rfakeroot -k${KEY}
+  fi
+  cd ..
+done
+if [ ! -d /tmp/packages ]; then
+  mkdir /tmp/packages
+fi
+cp *.deb /tmp/packages

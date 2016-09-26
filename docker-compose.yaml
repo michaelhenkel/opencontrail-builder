@@ -1,0 +1,13 @@
+version: '2'
+services:
+  opencontrail-builder:
+    image: michaelhenkel/opencontrail-builder:latest
+    volumes:
+      - /root/.ssh/id_rsa:/root/.ssh/id_rsa #this must be you git registered ssh key
+      - /tmp:/tmp/packages
+    environment:
+      - KEY=  #put in your launchpad key in case you have one
+      - JOBS=  #number of CPU cores to use
+      - CONTRAIL_VNC_REPO=git@github.com:Juniper/contrail-vnc.git
+      - CONTRAIL_BRANCH=  #branch (e.g. R3.1)
+      - VERSION=  #compliant version string (e.g. 3.1.0.0~2733)
