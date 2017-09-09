@@ -11,21 +11,16 @@ RUN wget http://downloads.datastax.com/cpp-driver/centos/7/cassandra/v2.4.2/cass
 RUN rpm -i libuv-devel-1.8.0-1.el7.centos.x86_64.rpm libuv-1.8.0-1.el7.centos.x86_64.rpm cassandra-cpp-driver-devel-2.4.2-1.el7.centos.x86_64.rpm cassandra-cpp-driver-2.4.2-1.el7.centos.x86_64.rpm
 RUN git clone https://github.com/edenhill/librdkafka/
 RUN tar zxvf libipfix_110209.tgz
-RUN cd libipfix_110209
-RUN ./configure
-RUN make && make install
-RUN cd ../librdkafka/
-RUN ./configure
-RUN make && make install
-RUN cd ../
+RUN cd /libipfix_110209 && ./configure && make && make install
+RUN cd /librdkafka/ && ./configure && make && make install
+RUN cd 
 RUN git clone https://github.com/michaelhenkel/zookeeper-el7-rpm
 RUN mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-RUN cd zookeeper-el7-rpm
-RUN wget http://apache.cs.uu.nl/zookeeper/zookeeper-3.4.8/zookeeper-3.4.8.tar.gz
-RUN mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-RUN cp -r * ~/rpmbuild/SOURCES/
-RUN rpmbuild -ba zookeeper.spec
-RUN rpm -i ~/rpmbuild/RPMS/x86_64/libzookeeper-3.4.8-1.x86_64.rpm ~/rpmbuild/RPMS/x86_64/libzookeeper-devel-3.4.8-1.x86_64.rpm ~/rpmbuild/RPMS/x86_64/python-zookeeper-3.4.8-1.x86_64.rpm
+RUN cd zookeeper-el7-rpm \
+      wget http://apache.cs.uu.nl/zookeeper/zookeeper-3.4.8/zookeeper-3.4.8.tar.gz \
+      cp -r * ~/rpmbuild/SOURCES/ \
+      rpmbuild -ba zookeeper.spec \
+      rpm -i ~/rpmbuild/RPMS/x86_64/libzookeeper-3.4.8-1.x86_64.rpm ~/rpmbuild/RPMS/x86_64/libzookeeper-devel-3.4.8-1.x86_64.rpm ~/rpmbuild/RPMS/x86_64/python-zookeeper-3.4.8-1.x86_64.rpm
 RUN wget --no-check-certificate -O /usr/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
 RUN chmod +x /usr/bin/repo
 COPY entrypoint-centos.sh /
