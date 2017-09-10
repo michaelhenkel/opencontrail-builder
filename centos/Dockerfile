@@ -16,11 +16,11 @@ RUN cd /librdkafka/ && ./configure && make && make install
 RUN cd 
 RUN git clone https://github.com/michaelhenkel/zookeeper-el7-rpm
 RUN mkdir -p ~/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
-RUN cd zookeeper-el7-rpm \
-      wget http://apache.cs.uu.nl/zookeeper/zookeeper-3.4.8/zookeeper-3.4.8.tar.gz \
-      cp -r * ~/rpmbuild/SOURCES/ \
-      rpmbuild -ba zookeeper.spec \
-      rpm -i ~/rpmbuild/RPMS/x86_64/libzookeeper-3.4.8-1.x86_64.rpm ~/rpmbuild/RPMS/x86_64/libzookeeper-devel-3.4.8-1.x86_64.rpm ~/rpmbuild/RPMS/x86_64/python-zookeeper-3.4.8-1.x86_64.rpm
+RUN curl -o /zookeeper-el7-rpm/zookeeper-3.4.8.tar.gz http://apache.cs.uu.nl/zookeeper/zookeeper-3.4.8/zookeeper-3.4.8.tar.gz
+RUN cp -r /zookeeper-el7-rpm/* ~/rpmbuild/SOURCES/
+RUN rpmbuild -ba /zookeeper-el7-rpm/zookeeper.spec
+RUN rpm -i ~/rpmbuild/RPMS/x86_64/libzookeeper-3.4.8-1.x86_64.rpm ~/rpmbuild/RPMS/x86_64/libzookeeper-devel-3.4.8-1.x86_64.rpm ~/rpmbuild/RPMS/x86_64/python-zookeeper-3.4.8-1.x86_64.rpm
+RUN ldconfig
 RUN wget --no-check-certificate -O /usr/bin/repo https://storage.googleapis.com/git-repo-downloads/repo
 RUN chmod +x /usr/bin/repo
 COPY entrypoint-centos.sh /
