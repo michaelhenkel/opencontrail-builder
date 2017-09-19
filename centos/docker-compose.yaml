@@ -5,6 +5,7 @@ services:
     volumes:
       - /root/.ssh/id_rsa:/root/.ssh/id_rsa #this must be you git registered ssh key
       - /tmp:/tmp/packages
+      - /usr/lib/modules:/usr/lib/modules
     environment:
       - KEY=  #put in your launchpad key in case you have one
       - JOBS=32  #number of CPU cores to use

@@ -1,4 +1,5 @@
 #!/bin/bash
+function version_gt() { test "$(printf '%s\n' "$@" | sort -V | head -n 1)" != "$1"; }
 export LC_ALL=C
 if [ -n "$JOBS" ]; then
   export JOBS=${JOBS}
@@ -20,6 +21,14 @@ if [ -n "$VERSION" ]; then
 fi
 export GIT_ACCOUNT=${GIT_ACCOUNT}
 export USER=root
+host_kernel=`uname -r`
+installed_kernel=`rpm -qa |grep kernel-headers |awk -F"kernel-headers-" '{print $2}'`
+if [[ `version_gt ${host_kernel} ${installed_kernel}` ]]; then
+  yum install -y kernel-headers-${host_kernel}
+else
+  yum downgrade -y kernel-headers-${host_kernel}
+fi
+
 git config --global user.email $GIT_ACCOUNT
 
 ssh-agent|grep -v "Agent pid" > ~/.ssh/ssh-agent.sh
@@ -73,9 +82,9 @@ repo sync
 cd ~/build/third_party
 python fetch_packages.py
 cd ~/build/tools/packaging/common/rpm
-SCONSFLAGS="-j $JOBS -Q debug=1" make all
+SCONSFLAGS="-j $JOBS --opt=production --tree=prune 2>&1 | tee build.log" make all
 if [ $? -ne 0 ]; then
-  SCONSFLAGS="-j $JOBS -Q debug=1" make all
+  SCONSFLAGS="-j $JOBS --opt=production --tree=prune 2>&1 | tee build.log" make all
 fi
 
 if [ ! -d /tmp/packages ]; then
